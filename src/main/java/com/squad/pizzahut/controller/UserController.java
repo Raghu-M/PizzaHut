@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.squad.pizzahut.constant.Constant;
 import com.squad.pizzahut.dto.FoodResponseDto;
+import com.squad.pizzahut.dto.GetOrderSummaryResponseDto;
 import com.squad.pizzahut.dto.LoginRequestDto;
 import com.squad.pizzahut.dto.LoginResponseDto;
 import com.squad.pizzahut.dto.OrderRequestDto;
@@ -41,7 +42,8 @@ public class UserController {
 	UserService userService;
 
 	/**
-<<<<<<< HEAD
+	 * <<<<<<< HEAD
+	 * 
 	 * @author PriyaDharshini S.
 	 * @since 2020-02-05. This method will authenticate the user.
 	 * @param loginDto - details of the user login
@@ -86,7 +88,6 @@ public class UserController {
 		return new ResponseEntity<>(orderResponseDto, HttpStatus.OK);
 	}
 
-	
 	@GetMapping("/{userId}/orders")
 	public ResponseEntity<UserOrderResponseDto> getOrders(@PathVariable("userId") Long userId)
 			throws NotFoundException {
@@ -102,8 +103,23 @@ public class UserController {
 		return ResponseEntity.ok().body(userOrderResponseDto);
 	}
 
+	@GetMapping("/{userId}/orders/{orderId}")
+	public ResponseEntity<GetOrderSummaryResponseDto> getOrderSummary(@PathVariable("orderId") Long orderId)
+			throws NotFoundException {
+		log.info("UserController getOrders ----> fetching user order summary");
+		if (orderId == null) {
+			log.error("UserController getOrders ----> NotFoundException occured");
+			throw new NotFoundException(Constant.USER_ID_MISSING);
+		}
+
+		GetOrderSummaryResponseDto getOrderSummaryResponseDto = userOrderService.getOrderSummary(orderId);
+		getOrderSummaryResponseDto.setMessage(Constant.SUCCESS);
+		getOrderSummaryResponseDto.setStatusCode(HttpStatus.OK.value());
+		return ResponseEntity.ok().body(getOrderSummaryResponseDto);
+	}
+
 	@GetMapping("/{userId}/foods")
-	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) throws UserNotFoundException{
+	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) throws UserNotFoundException {
 		log.info("Entering into getFoodMenu of UserController");
 		FoodResponseDto foodResponseDto = userService.getFoodMenu(userId);
 		foodResponseDto.setStatusCode(200);
