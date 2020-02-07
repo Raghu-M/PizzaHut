@@ -19,14 +19,15 @@ public class UserFoodOrder {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userFoodOrderId;
 	
-	@ManyToOne
+	@ManyToOne()
 	@JoinColumn(name = "food_id")
 	private Food food;
 	
 	@ManyToOne
 	@JoinColumn(name = "userorder_id")
-	private UserOrder userorder;
+	private UserOrder userOrder;
 	
 	private Integer quantity;
+
 
 }
