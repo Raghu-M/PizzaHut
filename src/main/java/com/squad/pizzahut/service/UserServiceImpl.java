@@ -1,6 +1,7 @@
 package com.squad.pizzahut.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,16 +17,21 @@ import com.squad.pizzahut.common.PizzaHutEnum;
 import com.squad.pizzahut.constant.Constant;
 import com.squad.pizzahut.designpattern.PaymentRegistry;
 import com.squad.pizzahut.dto.FoodDetail;
+import com.squad.pizzahut.dto.FoodMenuResponse;
+import com.squad.pizzahut.dto.FoodResponse;
+import com.squad.pizzahut.dto.FoodResponseDto;
 import com.squad.pizzahut.dto.LoginRequestDto;
 import com.squad.pizzahut.dto.LoginResponseDto;
 import com.squad.pizzahut.dto.OrderRequestDto;
 import com.squad.pizzahut.dto.OrderResponseDto;
+import com.squad.pizzahut.entity.Category;
 import com.squad.pizzahut.entity.Food;
 import com.squad.pizzahut.entity.User;
 import com.squad.pizzahut.entity.UserFoodOrder;
 import com.squad.pizzahut.entity.UserOrder;
 import com.squad.pizzahut.exception.FoodNotFoundException;
 import com.squad.pizzahut.exception.UserNotFoundException;
+import com.squad.pizzahut.repository.CategoryRepository;
 import com.squad.pizzahut.repository.FoodRepository;
 import com.squad.pizzahut.repository.UserFoodOrderRepository;
 import com.squad.pizzahut.repository.UserOrderRepository;
@@ -51,6 +57,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	UserFoodOrderRepository userFoodOrderRepository;
+
+	@Autowired
+	CategoryRepository categoryRepository;
 
 	/**
 	 * @author PriyaDharshini S.
@@ -102,13 +111,13 @@ public class UserServiceImpl implements UserService {
 	 * @author PriyaDharshini S
 	 * @param orderRequestDto - Takes parameters like Food Details,Vendor Id,Payment
 	 *                        Opted
-	 * @param userId      - takes of type Long which is the Employee SAP Id
+	 * @param userId          - takes of type Long which is the Employee SAP Id
 	 * @return OrderResponseDto - returns places order Id along with the status
 	 *         codes
-	 * @throws UserNotFoundException - thrown when the logged in employee
-	 *                                   details is invalid
-	 * @throws FoodNotFoundException     - thrown when the Food ordered doesn't
-	 *                                   belong to the existing menu
+	 * @throws UserNotFoundException - thrown when the logged in employee details is
+	 *                               invalid
+	 * @throws FoodNotFoundException - thrown when the Food ordered doesn't belong
+	 *                               to the existing menu
 	 * @since 2020-02-07
 	 */
 	@Transactional
@@ -155,6 +164,35 @@ public class UserServiceImpl implements UserService {
 		orderResponseDto.setFoodOrderId(userOrder.getUserOrderId());
 		return orderResponseDto;
 	}
-	
 
+	public FoodResponseDto getFoodMenu(Long userId) {
+		log.info("Entering into getFoodMenu() method of UserServiceImpl");
+		List<Category> categoryList = categoryRepository.findAll();
+		List<Food> foodList = foodRepository.findAll();
+		List<FoodMenuResponse> foodMenuResponseList = new ArrayList<>();
+		if (foodList.isEmpty()) {
+			log.debug("Food List is Empty");
+			return new FoodResponseDto();
+		}
+
+		categoryList.forEach(category -> {
+			List<FoodResponse> foodCategoryList = foodList.stream()
+					.filter(foodCategory -> foodCategory.getCategory().equals(category))
+					.map(foodCategory -> convertFoodToFoodResponse(foodCategory)).collect(Collectors.toList());
+			FoodMenuResponse foodMenuResponse = new FoodMenuResponse();
+			foodMenuResponse.setCategoryName(category.getCategoryName());
+			foodMenuResponse.setFoodList(foodCategoryList);
+			foodMenuResponseList.add(foodMenuResponse);
+		});
+		FoodResponseDto foodResponseDto = new FoodResponseDto();
+		foodResponseDto.setAllMenuList(foodMenuResponseList);
+		return foodResponseDto;
+
+	}
+
+	private FoodResponse convertFoodToFoodResponse(Food foodCategory) {
+		FoodResponse foodResponse = new FoodResponse();
+		BeanUtils.copyProperties(foodCategory, foodResponse);
+		return foodResponse;
+	}
 }
