@@ -1,5 +1,7 @@
 package com.squad.pizzahut.service;
 
-public interface UserService {
+import com.squad.pizzahut.dto.FoodResponseDto;
 
+public interface UserService {
+	public FoodResponseDto getFoodMenu(Long userId);
 }
