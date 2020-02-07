@@ -10,6 +10,7 @@ import com.squad.pizzahut.constant.Constant;
 import com.squad.pizzahut.dto.OrderSummary;
 import com.squad.pizzahut.dto.OrderedFood;
 import com.squad.pizzahut.dto.UserOrderResponseDto;
+import com.squad.pizzahut.dto.VendorOrderList;
 import com.squad.pizzahut.dto.VendorOrderResponseDto;
 import com.squad.pizzahut.entity.Food;
 import com.squad.pizzahut.entity.User;
@@ -17,7 +18,6 @@ import com.squad.pizzahut.entity.UserFoodOrder;
 import com.squad.pizzahut.entity.UserOrder;
 import com.squad.pizzahut.entity.VendorFoodCategory;
 import com.squad.pizzahut.exception.NotFoundException;
-import com.squad.pizzahut.repository.CategoryRepository;
 import com.squad.pizzahut.repository.UserFoodOrderRepository;
 import com.squad.pizzahut.repository.UserOrderRepository;
 import com.squad.pizzahut.repository.UserRepository;
@@ -58,7 +58,6 @@ public class UserOrderServiceImpl implements UserOrderService {
 	 *  @throws NotFoundException.class
 	 * 
 	 */
-
 	@Override
 	public UserOrderResponseDto getUserOrders(Long userId) throws NotFoundException {
 		log.info("UserOrderServiceImpl getOrders ----> fetching user order");
@@ -94,7 +93,18 @@ public class UserOrderServiceImpl implements UserOrderService {
 		userOrderResponseDto.setOrderSummarys(orderSummarys);
 		return userOrderResponseDto;
 	}
-
+	
+	/**
+	 * 
+	 * getOrders method fetch the user order based on the user id.
+	 * 
+	 *  @param Long type userId is taken as parameter to get that user order history.
+	 *  
+	 *  @return list of user order history
+	 *  
+	 *  @throws NotFoundException.class
+	 * 
+	 */
 	@Override
 	public VendorOrderResponseDto getVendorOrders(Long vendorId) throws NotFoundException {
 		log.info("UserOrderServiceImpl getVendorOrders ----> fetching vendor orders");
@@ -105,13 +115,29 @@ public class UserOrderServiceImpl implements UserOrderService {
 		User user = new User();
 		user.setUserId(vendorId);
 		List<VendorFoodCategory> vendorFoodCategorys = vendorFoodCategoryRepository.findByUser(user);
+		List<VendorOrderList> vendorOrderLists = new ArrayList<>();
 		vendorFoodCategorys.forEach(vendorFoodCategory -> {
 			Food food = new Food();
 			food.setFoodId(vendorFoodCategory.getFood().getFoodId());
-			List<UserFoodOrder> userFoodOrder = userFoodOrderRepository.findByFood(food);
+			List<UserFoodOrder> userFoodOrders = userFoodOrderRepository.findByFood(food);
+			userFoodOrders.forEach(userFoodOrder -> {
+				VendorOrderList vendorOrderList = new VendorOrderList();
+				vendorOrderList.setAddress(userFoodOrder.getUserOrder().getUser().getAddress());
+				vendorOrderList.setUserName(userFoodOrder.getUserOrder().getUser().getUserName());
+				vendorOrderList.setUserId(userFoodOrder.getUserOrder().getUser().getUserId());
+				vendorOrderList.setFoodName(userFoodOrder.getFood().getFoodName());
+				vendorOrderList.setPrice(userFoodOrder.getFood().getPrice());
+				vendorOrderList.setQuantity(userFoodOrder.getQuantity());
+				vendorOrderLists.add(vendorOrderList);
+			});
+			
 		});
 		
-		return null;
+		VendorOrderResponseDto vendorOrderResponseDto = new VendorOrderResponseDto();
+		vendorOrderResponseDto.setVendorOrders(vendorOrderLists);
+		return vendorOrderResponseDto;
 	}
+	
+	
 
 }

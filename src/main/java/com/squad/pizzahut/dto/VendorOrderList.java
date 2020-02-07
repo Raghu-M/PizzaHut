@@ -1,7 +1,5 @@
 package com.squad.pizzahut.dto;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,5 +11,6 @@ public class VendorOrderList {
 	private String address;
 	private Long userId;
 	private Double price;
-	private List<OrderedFood> orderedfoods;
+	private String foodName;
+	private Integer quantity;
 }
