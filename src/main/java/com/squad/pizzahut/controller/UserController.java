@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.squad.pizzahut.dto.FoodResponseDto;
+import com.squad.pizzahut.exception.UserNotFoundException;
 import com.squad.pizzahut.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class UserController {
 	UserService userService;
 	
 	@GetMapping("/{userId}/foods")
-	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId){
+	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) throws UserNotFoundException{
 		log.info("Entering into getFoodMenu of UserController");
 		FoodResponseDto foodResponseDto= userService.getFoodMenu(userId);
 		foodResponseDto.setStatusCode(200);
