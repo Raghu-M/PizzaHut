@@ -17,6 +17,7 @@ import com.squad.pizzahut.exception.NotFoundException;
 import com.squad.pizzahut.service.UserOrderService;
 import com.squad.pizzahut.dto.FoodResponseDto;
 import com.squad.pizzahut.dto.GetOrderSummaryResponseDto;
+import com.squad.pizzahut.exception.UserNotFoundException;
 import com.squad.pizzahut.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +76,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}/foods")
-	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) {
+	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) throws UserNotFoundException{
 		log.info("Entering into getFoodMenu of UserController");
 		FoodResponseDto foodResponseDto = userService.getFoodMenu(userId);
 		foodResponseDto.setStatusCode(200);

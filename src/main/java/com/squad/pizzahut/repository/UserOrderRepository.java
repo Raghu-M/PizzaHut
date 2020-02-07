@@ -13,4 +13,7 @@ public interface UserOrderRepository extends JpaRepository<UserOrder, Long>{
 	
 	List<UserOrder> findByUserOrderByUserOrderIdDesc(User user);
 
+	List<UserOrder> findByUser(User user);
+
+
 }
