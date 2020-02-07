@@ -70,7 +70,7 @@ public class UserController {
 	 *                               to the existing menu
 	 * @since 2020-02-07
 	 */
-	@PostMapping("{/{userId}/orders}")
+	@PostMapping("/{userId}/orders")
 	public ResponseEntity<OrderResponseDto> placeOrder(@Valid @RequestBody OrderRequestDto orderRequestDto,
 			@PathVariable Long userId) throws UserNotFoundException, FoodNotFoundException {
 		log.info("Entering into placeOrder() method of EmployeeController");

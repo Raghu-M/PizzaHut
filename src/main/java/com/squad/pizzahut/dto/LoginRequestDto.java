@@ -8,8 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginRequestDto {
-	@NotNull(message = "employeeId is required")
-	private String email;
+	@NotNull(message = "mobilenumber is required")
+	private Long mobile;
 	@NotNull(message = "password is required")
 	private String password;
 

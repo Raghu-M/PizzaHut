@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public LoginResponseDto authenticateUser(LoginRequestDto loginRequestDto) throws UserNotFoundException {
-		Optional<User> user = userRepository.findByEmailAndPassword(loginRequestDto.getEmail(),
+		Optional<User> user = userRepository.findByMobileAndPassword(loginRequestDto.getMobile(),
 				loginRequestDto.getPassword());
 		if (!user.isPresent()) {
 			throw new UserNotFoundException(Constant.USER_NOT_FOUND);
@@ -87,8 +87,18 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	UserFoodOrder convertToFoodOrderItem(FoodDetail foodDetail, UserOrder userOrder)
-			throws UserNotFoundException, FoodNotFoundException {
+	/**
+	 * This method converts the list obtained from UI to the FoodOrderItem Object
+	 * mapping by entities
+	 * 
+	 * @author PriyaDharshini S
+	 * @param foodDetail - contains foodId,quantity
+	 * @param UserOrder  - UserOrder table object->contains order details
+	 * @return UserFoodOrder - converted persistent object type
+	 * @throws FoodNotFoundException - when the ordered food is invalid
+	 * 
+	 */
+	public UserFoodOrder convertToFoodOrderItem(FoodDetail foodDetail, UserOrder userOrder) throws FoodNotFoundException {
 
 		Optional<Food> food = foodRepository.findById(foodDetail.getFoodId());
 		if (!food.isPresent()) {
@@ -120,7 +130,7 @@ public class UserServiceImpl implements UserService {
 	 *                               to the existing menu
 	 * @since 2020-02-07
 	 */
-	@Transactional
+	@Transactional()
 	public OrderResponseDto placeOrder(OrderRequestDto orderRequestDto, Long userId)
 			throws UserNotFoundException, FoodNotFoundException {
 		log.info("Entering into placeOrder() method of EmployeeServiceImpl");
@@ -147,7 +157,7 @@ public class UserServiceImpl implements UserService {
 		List<UserFoodOrder> foodOrderList = foodDetailList.stream().map(index -> {
 			try {
 				return convertToFoodOrderItem(index, userOrder);
-			} catch (UserNotFoundException | FoodNotFoundException e) {
+			} catch (FoodNotFoundException e) {
 				return null;
 			}
 		}).collect(Collectors.toList());

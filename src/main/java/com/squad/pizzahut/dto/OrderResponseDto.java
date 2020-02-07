@@ -8,4 +8,5 @@ import lombok.Setter;
 public class OrderResponseDto extends ResponseDto{
 
 	private Long foodOrderId;
+	
 }
