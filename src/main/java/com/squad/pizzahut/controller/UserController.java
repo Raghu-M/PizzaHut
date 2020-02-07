@@ -19,8 +19,11 @@ import com.squad.pizzahut.dto.LoginRequestDto;
 import com.squad.pizzahut.dto.LoginResponseDto;
 import com.squad.pizzahut.dto.OrderRequestDto;
 import com.squad.pizzahut.dto.OrderResponseDto;
+import com.squad.pizzahut.dto.UserOrderResponseDto;
 import com.squad.pizzahut.exception.FoodNotFoundException;
+import com.squad.pizzahut.exception.NotFoundException;
 import com.squad.pizzahut.exception.UserNotFoundException;
+import com.squad.pizzahut.service.UserOrderService;
 import com.squad.pizzahut.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
 	@Autowired
+	UserOrderService userOrderService;
+
+	@Autowired
 	UserService userService;
 
 	/**
+<<<<<<< HEAD
 	 * @author PriyaDharshini S.
 	 * @since 2020-02-05. This method will authenticate the user.
 	 * @param loginDto - details of the user login
@@ -79,12 +86,29 @@ public class UserController {
 		return new ResponseEntity<>(orderResponseDto, HttpStatus.OK);
 	}
 
+	
+	@GetMapping("/{userId}/orders")
+	public ResponseEntity<UserOrderResponseDto> getOrders(@PathVariable("userId") Long userId)
+			throws NotFoundException {
+		log.info("UserController getOrders ----> fetching user order");
+		if (userId == null) {
+			log.error("UserController getOrders ----> NotFoundException occured");
+			throw new NotFoundException(Constant.USER_ID_MISSING);
+		}
+
+		UserOrderResponseDto userOrderResponseDto = userOrderService.getUserOrders(userId);
+		userOrderResponseDto.setMessage(Constant.SUCCESS);
+		userOrderResponseDto.setStatusCode(HttpStatus.OK.value());
+		return ResponseEntity.ok().body(userOrderResponseDto);
+	}
+
 	@GetMapping("/{userId}/foods")
-	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) {
+	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) throws UserNotFoundException{
 		log.info("Entering into getFoodMenu of UserController");
 		FoodResponseDto foodResponseDto = userService.getFoodMenu(userId);
 		foodResponseDto.setStatusCode(200);
 		foodResponseDto.setStatusMessage("Success");
 		return new ResponseEntity<>(foodResponseDto, HttpStatus.OK);
 	}
+
 }

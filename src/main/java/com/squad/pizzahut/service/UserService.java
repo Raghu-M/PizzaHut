@@ -9,11 +9,9 @@ import com.squad.pizzahut.exception.FoodNotFoundException;
 import com.squad.pizzahut.exception.UserNotFoundException;
 
 public interface UserService {
+	public FoodResponseDto getFoodMenu(Long userId) throws UserNotFoundException;
 
 	LoginResponseDto authenticateUser(LoginRequestDto loginRequestDto) throws UserNotFoundException;
-
-	OrderResponseDto placeOrder(OrderRequestDto orderRequestDto, Long userId)
+	public OrderResponseDto placeOrder(OrderRequestDto orderRequestDto, Long userId)
 			throws UserNotFoundException, FoodNotFoundException;
-
-	FoodResponseDto getFoodMenu(Long userId);
 }

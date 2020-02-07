@@ -10,7 +10,10 @@ import com.squad.pizzahut.entity.UserOrder;
 
 @Repository
 public interface UserOrderRepository extends JpaRepository<UserOrder, Long>{
+	
+	List<UserOrder> findByUserOrderByUserOrderIdDesc(User user);
 
 	List<UserOrder> findByUser(User user);
+
 
 }

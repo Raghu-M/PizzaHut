@@ -2,9 +2,12 @@ package com.squad.pizzahut.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -13,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Multiset.Entry;
 import com.squad.pizzahut.common.PizzaHutEnum;
 import com.squad.pizzahut.constant.Constant;
 import com.squad.pizzahut.designpattern.PaymentRegistry;
@@ -108,7 +112,7 @@ public class UserServiceImpl implements UserService {
 
 		UserFoodOrder userFoodOrder = new UserFoodOrder();
 		userFoodOrder.setFood(food.get());
-		userFoodOrder.setUserorder(userOrder);
+		userFoodOrder.setUserOrder(userOrder);
 		userFoodOrder.setQuantity(foodDetail.getQuantity());
 
 		return userFoodOrder;
@@ -175,27 +179,54 @@ public class UserServiceImpl implements UserService {
 		return orderResponseDto;
 	}
 
-	public FoodResponseDto getFoodMenu(Long userId) {
-		log.info("Entering into getFoodMenu() method of UserServiceImpl");
-		List<Category> categoryList = categoryRepository.findAll();
-		List<Food> foodList = foodRepository.findAll();
-		List<FoodMenuResponse> foodMenuResponseList = new ArrayList<>();
-		if (foodList.isEmpty()) {
+	public FoodResponseDto getFoodMenu(Long userId) throws UserNotFoundException {
+		log.info("Entering into getFoodMenu() method of UserServiceImpl");	
+		List<Category> categoryList=categoryRepository.findAll();	
+		List<Food> foodList=foodRepository.findAll();
+		List<FoodMenuResponse> foodMenuResponseList= new ArrayList<>();
+		List<FoodResponse> preferenceList= new ArrayList<>();
+		if(foodList.isEmpty()) {
 			log.debug("Food List is Empty");
 			return new FoodResponseDto();
 		}
-
-		categoryList.forEach(category -> {
-			List<FoodResponse> foodCategoryList = foodList.stream()
-					.filter(foodCategory -> foodCategory.getCategory().equals(category))
-					.map(foodCategory -> convertFoodToFoodResponse(foodCategory)).collect(Collectors.toList());
-			FoodMenuResponse foodMenuResponse = new FoodMenuResponse();
+		//logic to get all the menu list
+		categoryList.forEach(category->{
+			List<FoodResponse> foodCategoryList=foodList.stream().filter(foodCategory->foodCategory.getCategory().equals(category)).map(foodCategory->convertFoodToFoodResponse(foodCategory)).collect(Collectors.toList());
+			FoodMenuResponse foodMenuResponse= new FoodMenuResponse();
 			foodMenuResponse.setCategoryName(category.getCategoryName());
 			foodMenuResponse.setFoodList(foodCategoryList);
 			foodMenuResponseList.add(foodMenuResponse);
-		});
-		FoodResponseDto foodResponseDto = new FoodResponseDto();
+		}		
+		);
+		
+		//logic to get the user preference list
+		Optional<User> userResponse=userRepository.findByUserId(userId);
+		if(!userResponse.isPresent()) {
+			throw new UserNotFoundException("User not found");
+		}
+		List<UserOrder> userOrderList=userOrderRepository.findByUser(userResponse.get());
+		List<UserFoodOrder> userFoodOrderList=userFoodOrderRepository.findAll();
+
+		Map<Food,Integer> map = new HashMap<>();
+		userFoodOrderList.forEach(index->{
+		if(map.get(index.getFood()) != null) {
+			map.put(index.getFood(), map.get(index.getFood())+1);
+		}
+		else {
+			map.put(index.getFood(), 1);
+		}
+		}
+		);
+			
+		FoodResponse foodResponse= new FoodResponse();
+		/*
+		 * Set<Entry<Food, Integer>> foodSet=map.entrySet(); for(Entry<Food, Integer>
+		 * index:foodSet) { BeanUtils.copyProperties(index.getKey(), foodResponse);
+		 * preferenceList.add(foodResponse); }
+		 */
+		FoodResponseDto foodResponseDto= new FoodResponseDto();
 		foodResponseDto.setAllMenuList(foodMenuResponseList);
+		foodResponseDto.setPreferenceList(preferenceList);
 		return foodResponseDto;
 
 	}
@@ -205,4 +236,6 @@ public class UserServiceImpl implements UserService {
 		BeanUtils.copyProperties(foodCategory, foodResponse);
 		return foodResponse;
 	}
+	
+	
 }

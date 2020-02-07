@@ -10,8 +10,10 @@ public class PizzaHutEnum {
 		PENDING, DELIVERED ,ORDERED;
 	}
 	
+	
+	
 	public enum PaymentType{
-		PAYTM, PHONEPE;
+		DEBIT_CARD, UPI,PAYTM,PHONEPE;
 	}
 
 }
