@@ -2,11 +2,13 @@ package com.squad.pizzahut.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.squad.pizzahut.constant.Constant;
+import com.squad.pizzahut.dto.GetOrderSummaryResponseDto;
 import com.squad.pizzahut.dto.OrderSummary;
 import com.squad.pizzahut.dto.OrderedFood;
 import com.squad.pizzahut.dto.UserOrderResponseDto;
@@ -137,6 +139,30 @@ public class UserOrderServiceImpl implements UserOrderService {
 		vendorOrderResponseDto.setVendorOrders(vendorOrderLists);
 		return vendorOrderResponseDto;
 	}
+
+	@Override
+	public GetOrderSummaryResponseDto getOrderSummary(Long orderId) throws NotFoundException {
+		Optional<UserOrder> userOrder = userOrderRepository.findById(orderId);
+		GetOrderSummaryResponseDto getOrderSummaryResponseDto = new GetOrderSummaryResponseDto();
+		if(!userOrder.isPresent()) {
+			log.error("UserOrderServiceImpl getOrders ----> NotFoundException occured");
+			throw new NotFoundException(Constant.USER_NOT_FOUND);
+		}
+		List<UserFoodOrder> userFoodOrders  = userFoodOrderRepository.findByUserOrder(userOrder.get());
+		List<OrderedFood> orderedFoods = new ArrayList<>();
+		userFoodOrders.forEach(userFoodOrder -> {
+			OrderedFood orderedFood = new OrderedFood();
+			orderedFood.setFoodName(userFoodOrder.getFood().getFoodName());
+			orderedFood.setQuantity(userFoodOrder.getQuantity());
+			orderedFoods.add(orderedFood);
+		});
+		getOrderSummaryResponseDto.setAmount(userOrder.get().getTotalAmount());
+		getOrderSummaryResponseDto.setOrderId(userOrder.get().getUserOrderId());
+		getOrderSummaryResponseDto.setOrderedfoods(orderedFoods);
+		return getOrderSummaryResponseDto;
+	}
+	
+	
 	
 	
 

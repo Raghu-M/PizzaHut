@@ -16,6 +16,7 @@ import com.squad.pizzahut.dto.UserOrderResponseDto;
 import com.squad.pizzahut.exception.NotFoundException;
 import com.squad.pizzahut.service.UserOrderService;
 import com.squad.pizzahut.dto.FoodResponseDto;
+import com.squad.pizzahut.dto.GetOrderSummaryResponseDto;
 import com.squad.pizzahut.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,21 @@ public class UserController {
 		userOrderResponseDto.setStatusCode(HttpStatus.OK.value());
 		return ResponseEntity.ok().body(userOrderResponseDto);
 	}
+	
+	@GetMapping("/{userId}/orders/{orderId}")
+	public ResponseEntity<GetOrderSummaryResponseDto> getOrderSummary(@PathVariable("orderId") Long orderId)
+			throws NotFoundException {
+		log.info("UserController getOrders ----> fetching user order summary");
+		if (orderId == null) {
+			log.error("UserController getOrders ----> NotFoundException occured");
+			throw new NotFoundException(Constant.USER_ID_MISSING);
+		}
+
+		GetOrderSummaryResponseDto getOrderSummaryResponseDto = userOrderService.getOrderSummary(orderId);
+		getOrderSummaryResponseDto.setMessage(Constant.SUCCESS);
+		getOrderSummaryResponseDto.setStatusCode(HttpStatus.OK.value());
+		return ResponseEntity.ok().body(getOrderSummaryResponseDto);
+	}
 
 	@GetMapping("/{userId}/foods")
 	public ResponseEntity<FoodResponseDto> getFoodMenu(@Valid @PathVariable Long userId) {
@@ -66,5 +82,6 @@ public class UserController {
 		foodResponseDto.setStatusMessage("Success");
 		return new ResponseEntity<>(foodResponseDto, HttpStatus.OK);
 	}
+	
 
 }
