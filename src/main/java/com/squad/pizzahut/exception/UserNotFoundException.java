@@ -8,4 +8,5 @@ public class UserNotFoundException extends Exception{
 		super(message);
 	}
 	
+	
 }

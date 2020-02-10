@@ -7,8 +7,10 @@ public class PizzaHutEnum {
 	}
 	
 	public enum OrderStatus{
-		PENDING, DELIVERED,ORDERED;
+		PENDING, DELIVERED ,ORDERED;
 	}
+	
+	
 	
 	public enum PaymentType{
 		DEBIT_CARD, UPI,PAYTM,PHONEPE;
