@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -16,7 +17,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Multiset.Entry;
 import com.squad.pizzahut.common.PizzaHutEnum;
 import com.squad.pizzahut.constant.Constant;
 import com.squad.pizzahut.designpattern.PaymentRegistry;
@@ -102,7 +102,8 @@ public class UserServiceImpl implements UserService {
 	 * @throws FoodNotFoundException - when the ordered food is invalid
 	 * 
 	 */
-	public UserFoodOrder convertToFoodOrderItem(FoodDetail foodDetail, UserOrder userOrder) throws FoodNotFoundException {
+	public UserFoodOrder convertToFoodOrderItem(FoodDetail foodDetail, UserOrder userOrder)
+			throws FoodNotFoundException {
 
 		Optional<Food> food = foodRepository.findById(foodDetail.getFoodId());
 		if (!food.isPresent()) {
@@ -180,51 +181,51 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public FoodResponseDto getFoodMenu(Long userId) throws UserNotFoundException {
-		log.info("Entering into getFoodMenu() method of UserServiceImpl");	
-		List<Category> categoryList=categoryRepository.findAll();	
-		List<Food> foodList=foodRepository.findAll();
-		List<FoodMenuResponse> foodMenuResponseList= new ArrayList<>();
-		List<FoodResponse> preferenceList= new ArrayList<>();
-		if(foodList.isEmpty()) {
+		log.info("Entering into getFoodMenu() method of UserServiceImpl");
+		List<Category> categoryList = categoryRepository.findAll();
+		List<Food> foodList = foodRepository.findAll();
+		List<FoodMenuResponse> foodMenuResponseList = new ArrayList<>();
+		List<FoodResponse> preferenceList = new ArrayList<>();
+		if (foodList.isEmpty()) {
 			log.debug("Food List is Empty");
 			return new FoodResponseDto();
 		}
-		//logic to get all the menu list
-		categoryList.forEach(category->{
-			List<FoodResponse> foodCategoryList=foodList.stream().filter(foodCategory->foodCategory.getCategory().equals(category)).map(foodCategory->convertFoodToFoodResponse(foodCategory)).collect(Collectors.toList());
-			FoodMenuResponse foodMenuResponse= new FoodMenuResponse();
+		// logic to get all the menu list
+		categoryList.forEach(category -> {
+			List<FoodResponse> foodCategoryList = foodList.stream()
+					.filter(foodCategory -> foodCategory.getCategory().equals(category))
+					.map(foodCategory -> convertFoodToFoodResponse(foodCategory)).collect(Collectors.toList());
+			FoodMenuResponse foodMenuResponse = new FoodMenuResponse();
 			foodMenuResponse.setCategoryName(category.getCategoryName());
 			foodMenuResponse.setFoodList(foodCategoryList);
 			foodMenuResponseList.add(foodMenuResponse);
-		}		
-		);
-		
-		//logic to get the user preference list
-		Optional<User> userResponse=userRepository.findByUserId(userId);
-		if(!userResponse.isPresent()) {
+		});
+
+		// logic to get the user preference list
+		Optional<User> userResponse = userRepository.findByUserId(userId);
+		if (!userResponse.isPresent()) {
 			throw new UserNotFoundException("User not found");
 		}
-		List<UserOrder> userOrderList=userOrderRepository.findByUser(userResponse.get());
-		List<UserFoodOrder> userFoodOrderList=userFoodOrderRepository.findAll();
+		List<UserFoodOrder> userFoodOrderList = userFoodOrderRepository.findAll();
 
-		Map<Food,Integer> map = new HashMap<>();
-		userFoodOrderList.forEach(index->{
-		if(map.get(index.getFood()) != null) {
-			map.put(index.getFood(), map.get(index.getFood())+1);
-		}
-		else {
-			map.put(index.getFood(), 1);
-		}
-		}
-		);
-			
-		FoodResponse foodResponse= new FoodResponse();
-		/*
-		 * Set<Entry<Food, Integer>> foodSet=map.entrySet(); for(Entry<Food, Integer>
-		 * index:foodSet) { BeanUtils.copyProperties(index.getKey(), foodResponse);
-		 * preferenceList.add(foodResponse); }
-		 */
-		FoodResponseDto foodResponseDto= new FoodResponseDto();
+		Map<Food, Integer> map = new HashMap<>();
+		userFoodOrderList.forEach(index -> {
+			if (map.get(index.getFood()) != null) {
+				map.put(index.getFood(), map.get(index.getFood()) + 1);
+			} else {
+				map.put(index.getFood(), 1);
+			}
+		});
+
+		FoodResponse foodResponse = new FoodResponse();
+		
+		  Set<Entry<Food, Integer>> foodSet=map.entrySet(); 
+		  for(Entry<Food, Integer> index:foodSet) 
+		  { BeanUtils.copyProperties(index.getKey(), foodResponse);
+		  preferenceList.add(foodResponse); 
+		  }
+		 
+		FoodResponseDto foodResponseDto = new FoodResponseDto();
 		foodResponseDto.setAllMenuList(foodMenuResponseList);
 		foodResponseDto.setPreferenceList(preferenceList);
 		return foodResponseDto;
@@ -236,6 +237,5 @@ public class UserServiceImpl implements UserService {
 		BeanUtils.copyProperties(foodCategory, foodResponse);
 		return foodResponse;
 	}
-	
-	
+
 }

@@ -42,7 +42,6 @@ public class UserController {
 	UserService userService;
 
 	/**
-	 * <<<<<<< HEAD
 	 * 
 	 * @author PriyaDharshini S.
 	 * @since 2020-02-05. This method will authenticate the user.
